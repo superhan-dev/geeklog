@@ -1,0 +1,40 @@
+{
+  "name": "geeklog",
+  "version": "0.1.0",
+  "description": "GeekLog CLI - Markdown 기반 블로그/포트폴리오 관리 도구",
+  "type": "module",
+  "main": "./dist/index.js",
+  "bin": {
+    "geeklog": "./bin/geeklog.js"
+  },
+  "files": [
+    "dist/**/*",
+    "bin/**/*",
+    "README.md"
+  ],
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "blog",
+    "portfolio",
+    "markdown",
+    "cli",
+    "static-site-generator"
+  ],
+  "author": "superhan-dev",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/superhan-dev/geeklog.git"
+  },
+  "homepage": "https://github.com/superhan-dev/geeklog#readme",
+  "bugs": {
+    "url": "https://github.com/superhan-dev/geeklog/issues"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
