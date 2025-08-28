@@ -66,6 +66,7 @@ pq.enqueue("B", 1);
 
   - 주요 로직
     - index는 0부터 시작하여 left, right index를 찾는다.
+      - 반복은 left 자식노드가 길이보다 작을때 순회한다.
       - left를 찾는 방법 : index \* 2 + 1
       - right를 찾는 방법 : index \* 2 + 2
       - 현재 인덱스가 0이라면 left=1, right=2 로 구해진다.
@@ -167,15 +168,14 @@ function solution(graph, start) {
   }
 
   distances[start] = 0;
-  const queue = new MinHeap();
-  // 이렇게 되면 어떤 형태로 저장되는거지?
-  queue.push([distances[start], start]);
+  const minHeap = new MinHeap();
 
-  // 왜 이렇게 하는거지?
+  minHeap.push([distances[start], start]);
+
   const paths = { [start]: [start] };
 
-  while (queue.size() > 0) {
-    const [currDist, currNode] = queue.pop();
+  while (minHeap.size() > 0) {
+    const [currDist, currNode] = minHeap.pop();
 
     if (distances[currNode] < currDist) {
       continue;
@@ -190,7 +190,7 @@ function solution(graph, start) {
 
         paths[adjNode] = [...paths[currNode], adjNode];
 
-        queue.push([dist, adjNode]);
+        minHeap.push([dist, adjNode]);
       }
     }
   }
@@ -204,4 +204,83 @@ function solution(graph, start) {
 
   return [distances, sortedPaths];
 }
+```
+
+```javascript
+class MinHeap {
+  constructor() {
+    this.items = [];
+  }
+
+  swap(a, b) {
+    [this.items[a], this.items[b]] = [this.items[b], this.items[a]];
+  }
+
+  size() {
+    return this.items.length;
+  }
+
+  push(value) {
+    this.items.push(value);
+    this.bubbleUp();
+  }
+
+  pop() {
+    let min = this.items[0];
+    this.items[0] = this.items[this.size() - 1];
+    this.items.pop();
+
+    this.bubbleDown();
+
+    return min;
+  }
+
+  bubbleUp() {
+    let index = this.size() - 1;
+
+    while (index > 0) {
+      let parentIndex = Math.floor((index - 1) / 2);
+
+      if (this.items[parentIndex] <= this.items[index]) {
+        break;
+      }
+
+      this.swap(parentIndex, index);
+      index = parentIndex;
+    }
+  }
+
+  bubbleDown() {
+    let index = 0;
+    while (index < this.items.length) {
+      let left = index * 2 + 1;
+      let right = index * 2 + 2;
+      let smaller = right < this.items.length && right < left ? right : left;
+
+      // smaller 값이 index 보다 작다면 순회를 멈춘다.
+      if (this.items[index] < this.items[smaller]) break;
+
+      this.swap(smaller, index);
+      index = smaller;
+    }
+  }
+}
+```
+
+# comments
+
+- [2025-08-27] 최소힙 + BFS를 함께 응용하여 다익스트라를 만들어보았다. 인접리스트 그래프를 BFS로 순회하는 로직에 최소힙을 응용하는 로직인데 최단거리를 그리디하게 구할때 유용하게 사용되는 로직이었다.
+
+```javascript
+[
+  { A: 0, B: 9, C: 3, D: 11, E: 4, F: 10 },
+  {
+    A: ["A"],
+    B: ["A", "B"],
+    C: ["A", "C"],
+    D: ["A", "C", "D"],
+    E: ["A", "C", "E"],
+    F: ["A", "C", "E", "F"],
+  },
+];
 ```
