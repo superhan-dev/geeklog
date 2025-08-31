@@ -1,121 +1,86 @@
-class MinHeap {
+const N = 5,
+  M = 6,
+  S = 1;
+const edges = [
+  [1, 2, 2],
+  [1, 3, 5],
+  [2, 3, 1],
+  [2, 4, 2],
+  [3, 5, 3],
+  [4, 5, 1],
+];
+// result
+// 0
+// 2
+// 3
+// 4
+// 5
+// ---
+// const N = 6,
+//   M = 4,
+//   S = 1;
+// const edges = [
+//   [1, 2, 2],
+//   [2, 3, 4],
+//   [2, 4, 6],
+//   [5, 6, 1],
+// ];
+
+// 0
+// 2
+// 6
+// 8
+// INF
+// INF
+class PriorityQueue {
   constructor() {
     this.items = [];
-  }
-
-  swap(a, b) {
-    [this.items[a], this.items[b]] = [this.items[b], this.items[a]];
   }
 
   size() {
     return this.items.length;
   }
 
-  push(value) {
-    this.items.push(value);
-    this.bubbleUp();
+  sort() {
+    this.items.sort((a, b) => a[1] - b[1]);
   }
 
-  pop() {
-    if (this.items.length === 0) return null;
-
-    let min = this.items[0];
-    this.items[0] = this.items[this.size() - 1];
-    this.items.pop();
-
-    this.bubbleDown();
-
-    return min;
+  enqueue(value, priority) {
+    this.items.push([value, priority]);
   }
 
-  bubbleUp() {
-    let index = this.size() - 1;
-
-    while (index > 0) {
-      let parentIndex = Math.floor((index - 1) / 2);
-      // 부모의 값이 index보다 작으면 멈춘다.
-      if (this.items[parentIndex] <= this.items[index]) break;
-
-      this.swap(parentIndex, index);
-      index = parentIndex;
-    }
-  }
-
-  bubbleDown() {
-    let index = 0;
-    while (index * 2 + 1 < this.size()) {
-      let left = index * 2 + 1;
-      let right = index * 2 + 2;
-      let smaller =
-        right < this.size() && this.items[right] < this.items[left]
-          ? right
-          : left;
-
-      // smaller 값이 index 보다 작다면 순회를 멈춘다.
-      if (this.items[index] <= this.items[smaller]) break;
-
-      this.swap(index, smaller);
-      index = smaller;
-    }
+  dequeue() {
+    return this.items.shift();
   }
 }
 
-const minHeap = new MinHeap();
+function dijkstra(n, edges, start) {
+  const dist = Array.from({ length: n + 1 }).fill(Infinity);
 
-const graph = {
-  A: { B: 9, C: 3 },
-  B: { A: 9, D: 2 },
-  C: { A: 3, D: 8, E: 1 },
-  D: { B: 2, C: 8, E: 7, F: 4 },
-  E: { C: 1, D: 7, F: 6 },
-  F: { D: 4, E: 6 },
-};
-
-function solution(graph, start) {
-  const distances = {};
-
-  for (const node in graph) {
-    distances[node] = Infinity;
+  const adjList = Array.from({ length: n + 1 }, () => []);
+  for (const [u, v, w] of edges) {
+    adjList[u].push([v, w]);
+    adjList[v].push([u, w]);
   }
 
-  distances[start] = 0;
-  const minHeap = new MinHeap();
+  dist[start] = 0;
 
-  minHeap.push([distances[start], start]);
+  const pq = new PriorityQueue();
+  pq.enqueue(start, 0);
 
-  const paths = { [start]: [start] };
+  while (pq.size() > 0) {
+    const [u, currDist] = pq.dequeue();
 
-  while (minHeap.size() > 0) {
-    const [currDist, currNode] = minHeap.pop();
-
-    if (distances[currNode] < currDist) continue;
-
-    for (const adjNode in graph[currNode]) {
-      const weight = graph[currNode][adjNode];
-
-      const dist = currDist + weight;
-
-      if (dist < distances[adjNode]) {
-        distances[adjNode] = dist;
-
-        paths[adjNode] = [...paths[currNode], adjNode];
-        minHeap.push([dist, adjNode]);
+    for (const [v, w] of adjList[u]) {
+      if (dist[v] > currDist + w) {
+        dist[v] = currDist + w;
+        pq.enqueue(v, dist[v]);
       }
     }
   }
 
-  const sortedPaths = {};
-  Object.keys(paths)
-    .sort()
-    .forEach((node) => {
-      sortedPaths[node] = paths[node];
-    });
-
-  console.log("최단 경로:", sortedPaths);
-
-  return [distances, sortedPaths];
+  return dist.slice(1);
 }
-
-const temp = solution(graph, "A");
-
-console.log("res:", temp);
+const result = dijkstra(N, edges, S);
+console.log(result);
+console.log(result.map((d) => (d === Infinity ? "INF" : d)).join("\n"));
